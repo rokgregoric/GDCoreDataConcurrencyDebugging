@@ -21,6 +21,8 @@
                      withMethod:@selector(gd_managedObjectClassName)
                           error:&error]) {
         NSLog(@"Failed to swizzle with error: %@", error);
+    } else {
+        NSLog(@"GDCoreDataConcurrencyDebugging enabled.");
     }
 }
 #endif
