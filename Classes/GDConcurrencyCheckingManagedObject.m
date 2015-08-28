@@ -154,19 +154,21 @@ static void BreakOnInvalidConcurrentAccessOnRelease(NSString *classStringReprese
 #endif
 }
 
-static void BreakOnInvalidConcurrentAccess(NSString *selectorStringRepresentation, NSArray *callStackSymbols)
+static void BreakOnInvalidConcurrentAccess(id object, NSString *selectorStringRepresentation, NSArray *callStackSymbols)
 {
 #ifndef GD_CORE_DATA_CONCURRENCE_DEBUGGING_DISABLE_LOG
-    NSLog(@"If you want to break on invalid concurrent access, add a breakpoint on symbol BreakOnInvalidConcurrentAccess");
-    NSLog(@"Invalid concurrent access to managed object calling '%@'; Stacktrace: %@"
+//    NSLog(@"If you want to break on invalid concurrent access, add a breakpoint on symbol BreakOnInvalidConcurrentAccess");
+    NSLog(@"Invalid concurrent access calling '%@' on managed object %@; Stacktrace: %@"
           , selectorStringRepresentation
+          , [object class]
           , callStackSymbols);
 #endif
-    
+
 #ifdef GD_CORE_DATA_CONCURRENCE_DEBUGGING_ENABLE_EXCEPTION
     [NSException raise:GDInvalidConcurrentAccesException
-                format:@"Invalid concurrent access to managed object calling '%@'; Stacktrace: %@"
+                format:@"Invalid concurrent access calling '%@' on managed object %@; Stacktrace: %@"
      , selectorStringRepresentation
+     , [object class]
      , callStackSymbols];
 #endif
 }
@@ -258,7 +260,7 @@ static BOOL ValidateConcurrency(id object, SEL _cmd)
         } else if (GDConcurrencyFailureFunction) {
             GDConcurrencyFailureFunction(_cmd);
         } else {
-            BreakOnInvalidConcurrentAccess(NSStringFromSelector(_cmd), [NSThread callStackSymbols]);
+            BreakOnInvalidConcurrentAccess(object, NSStringFromSelector(_cmd), [NSThread callStackSymbols]);
         }
     }
     return concurrencyValid;
